@@ -1,0 +1,14 @@
+# Node / Next.js
+node_modules/
+.next/
+.out/
+dist/
+coverage/
+.vercel/
+.env
+.env.*
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
