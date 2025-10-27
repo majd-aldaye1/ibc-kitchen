@@ -2,7 +2,7 @@
 
 import Fuse from 'fuse.js'
 import { useMemo, useState } from 'react'
-import recipes from '../data/recipes'
+import recipes, { type Recipe } from '../data/recipes'
 import { catSlug } from '../lib/slug'
 
 export default function HomePage() {
@@ -37,7 +37,7 @@ export default function HomePage() {
 
   // Compute results with tiered ranking:
   // 1) title prefix > 2) title contains > 3) ingredient contains > 4) category contains > 5) other fuzzy matches
-  const results = useMemo(() => {
+  const results: Recipe[] = useMemo(() => {
     if (!qNorm) return recipes
 
     const raw = fuse.search(qNorm).map((r) => ({ item: r.item, score: r.score ?? 1 }))
@@ -57,7 +57,7 @@ export default function HomePage() {
     const tier4 = take(raw.filter((x) => catContains(x.item))).sort((a, b) => a.score - b.score)
     const tier5 = take(raw) // whatever’s left (fuzzy but not substring)
 
-    return [...tier1, ...tier2, ...tier3, ...tier4, ...tier5].map((x) => x.item)
+    return [...tier1, ...tier2, ...tier3, ...tier4, ...tier5].map((x) => x.item as Recipe)
   }, [fuse, qNorm])
 
   const categories = useMemo(() => {
@@ -101,7 +101,7 @@ export default function HomePage() {
 
       <h2 className="mt-6 text-sm font-semibold text-gray-500">All recipes</h2>
       <ul className="grid gap-3">
-        {results.map(r => (
+        {results.map((r:Recipe) => (
           <li key={r.slug} className="rounded-xl border p-4 hover:bg-gray-50 dark:hover:bg-neutral-900">
             <a href={`/recipes/${r.slug}`} className="block">
               <div className="flex items-center justify-between">

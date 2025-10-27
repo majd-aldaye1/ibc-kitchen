@@ -2,19 +2,18 @@
 
 
 import { useMemo } from 'react'
-import all from '../../../data/recipes'
+import all, { type Recipe } from '../../../data/recipes'
 import { catSlug } from '../../../lib/slug'
 
-type RecipeLite = { title: string; slug: string; category?: string }
 
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
   const { slug } = params
   const { name, items } = useMemo(() => {
-    const items = (all as RecipeLite[])
-      .filter((r: RecipeLite) => catSlug(r.category || 'General') === slug)
+    const items = (all as Recipe[])
+      .filter((r: Recipe) => catSlug(r.category || 'General') === slug)
       .slice()
-      .sort((a: RecipeLite, b: RecipeLite) => a.title.localeCompare(b.title))
+      .sort((a: Recipe, b: Recipe) => a.title.localeCompare(b.title))
     const name = items[0]?.category || slug.replace(/-/g,' ')
     return { name, items }
     }, [slug])

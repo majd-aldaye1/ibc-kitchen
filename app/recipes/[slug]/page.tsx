@@ -2,29 +2,34 @@
 
 
 import { useEffect, useMemo, useState } from 'react'
-import all from '../../../data/recipes'
+import all, { type Recipe, type Ingredient } from '../../../data/recipes'
 import { conversions, Unit, dimensionOf, convertQuantity, toDisplayFraction } from '../../../lib/conversions'
 import { useLocalStorage } from '../../../lib/useLocalStorage'
 import Timer from '../../../components/Timer'
 
 
 export default function RecipePage({ params }: { params: { slug: string } }) {
-const recipe = useMemo(() => all.find(r => r.slug === params.slug), [params.slug])
+const recipe = useMemo<Recipe | undefined>(() => all.find((r: Recipe) => r.slug === params.slug), [params.slug])
 const [servings, setServings] = useState<number>(recipe?.yieldCount ?? 1)
 const [checked, setChecked] = useLocalStorage<Record<string, boolean>>(`chk:${recipe?.slug}`, {})
 const [unitPrefs, setUnitPrefs] = useLocalStorage<Record<string, Unit>>(`unit:${recipe?.slug}`, {})
 const [customMap, setCustomMap] = useLocalStorage<Record<string, { name: string, factor: number, base: 'mass'|'volume' }>>('custom:units', {})
 
 useEffect(() => {
-if (!recipe) return
-setServings(recipe.yieldCount)
+  if (!recipe) return
+  // if yieldCount is a number use it, otherwise fall back to 1
+  const next = (typeof recipe.yieldCount === 'number' && !Number.isNaN(recipe.yieldCount))
+    ? recipe.yieldCount
+    : 1
+  setServings(next)
 }, [recipe])
 
 
 if (!recipe) return <p>Not found.</p>
 
 
-const scale = servings / recipe.yieldCount
+const baseYield = recipe.yieldCount ?? 1
+const scale = servings / baseYield
 
 return (
   <div className="space-y-8">
@@ -32,15 +37,18 @@ return (
       <h1 className="text-2xl font-bold">{recipe.title}</h1>
       <div className="flex items-center gap-3 text-sm">
         <span className="text-gray-500">Yield:</span>
-        <input
-          type="number"
-          min={0.1}
-          step={0.1}
-          value={servings}
-          onChange={e => setServings(parseFloat(e.target.value) || recipe.yieldCount)}
-          className="w-24 rounded-lg border px-2 py-1"
-          aria-label="Servings"
-        />
+      <input
+        type="number"
+        min={0.1}
+        step={0.1}
+        value={servings}
+        onChange={e => {
+          const v = parseFloat(e.target.value)
+          setServings(Number.isFinite(v) && v > 0 ? v : baseYield)
+        }}
+        className="w-24 rounded-lg border px-2 py-1"
+        aria-label="Servings"
+      />
         <span className="text-gray-500">{recipe.yieldUnit}</span>
       </div>
       <p className="text-gray-600 dark:text-gray-300">{recipe.description}</p>
@@ -49,7 +57,7 @@ return (
     <section>
       <h2 className="mb-3 font-semibold">Ingredients</h2>
         <ul className="space-y-2">
-          {recipe.ingredients.map((ing) => {
+          {recipe.ingredients.map((ing: Ingredient) => {
             const id = `${ing.name}-${ing.orderIndex}`
             const original = ing.quantity * scale
             const isCount = ing.unit === 'count'
@@ -132,7 +140,7 @@ aria-label={`Unit for ${ing.name}`}
 <section className="space-y-2">
 <h2 className="font-semibold">Steps</h2>
 <ol className="list-decimal space-y-2 pl-6">
-{recipe.steps.map((s, i) => (
+{recipe.steps.map((s: string, i: number) => (
 <li key={i} className="leading-relaxed">{s}</li>
 ))}
 </ol>

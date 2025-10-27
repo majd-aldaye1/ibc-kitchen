@@ -3,6 +3,9 @@ export type Ingredient = {
   name: string
   quantity: number
   unit: string
+  // NEW (optional) — used in UI/conversions:
+  prepNote?: string
+  density_g_per_ml?: number
 }
 
 export type Recipe = {
