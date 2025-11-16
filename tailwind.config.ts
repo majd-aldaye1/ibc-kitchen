@@ -7,7 +7,17 @@ content: [
 './components/**/*.{ts,tsx}',
 ],
 theme: {
-extend: {},
-},
+  extend: {
+    colors: {
+      brand: {
+        red: 'var(--brand-red)',
+        redDark: 'var(--brand-red-dark)',
+        coal: 'var(--coal)',
+        paper: 'var(--paper)',
+      }
+    }
+  }
+}
+,
 plugins: [],
 } satisfies Config

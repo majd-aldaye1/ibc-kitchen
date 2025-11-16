@@ -1,12 +1,19 @@
 'use client'
 
 import Fuse from 'fuse.js'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import recipes, { type Recipe } from '../data/recipes'
 import { catSlug } from '../lib/slug'
+import Link from 'next/link'
+import type { Route } from 'next'
+import { useSearchParams } from 'next/navigation'
+import Hero from '../components/Hero'
 
 export default function HomePage() {
-  const [q, setQ] = useState('')
+  // Read q from URL so the header search controls results
+  const searchParams = useSearchParams()
+  const q = (searchParams.get('q') || '').trim()
+  const qNorm = q.toLowerCase()
 
   // Build a single Fuse index (slightly stricter, include scores)
   const fuse = useMemo(
@@ -20,14 +27,13 @@ export default function HomePage() {
         includeScore: true,
         ignoreLocation: true,
         minMatchCharLength: 3,
-        threshold: 0.28, // stricter than before (was 0.35)
+        threshold: 0.28,
         distance: 150,
       }),
     []
   )
 
-  // Helper: quick substring checks (case-insensitive)
-  const qNorm = q.trim().toLowerCase()
+  // Quick helpers
   const titleContains = (r: any) => (r.title || '').toLowerCase().includes(qNorm)
   const titleStarts   = (r: any) => (r.title || '').toLowerCase().startsWith(qNorm)
   const ingContains   = (r: any) =>
@@ -35,8 +41,7 @@ export default function HomePage() {
     r.ingredients.some((i: any) => (i?.name || '').toLowerCase().includes(qNorm))
   const catContains   = (r: any) => (r.category || '').toLowerCase().includes(qNorm)
 
-  // Compute results with tiered ranking:
-  // 1) title prefix > 2) title contains > 3) ingredient contains > 4) category contains > 5) other fuzzy matches
+  // Tiered ranking
   const results: Recipe[] = useMemo(() => {
     if (!qNorm) return recipes
 
@@ -55,7 +60,7 @@ export default function HomePage() {
     const tier2 = take(raw.filter((x) => titleContains(x.item))).sort((a, b) => a.score - b.score)
     const tier3 = take(raw.filter((x) => ingContains(x.item))).sort((a, b) => a.score - b.score)
     const tier4 = take(raw.filter((x) => catContains(x.item))).sort((a, b) => a.score - b.score)
-    const tier5 = take(raw) // whatever’s left (fuzzy but not substring)
+    const tier5 = take(raw)
 
     return [...tier1, ...tier2, ...tier3, ...tier4, ...tier5].map((x) => x.item as Recipe)
   }, [fuse, qNorm])
@@ -71,69 +76,63 @@ export default function HomePage() {
       .sort((a, b) => a.name.localeCompare(b.name))
   }, [])
 
-  const showCategories = q.trim().length === 0
+  const showCategories = q.length === 0
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <input
-          autoFocus
-          className="w-full rounded-xl border px-3 py-2"
-          placeholder="Search recipes or ingredients (e.g., smoked paprika, chicken)"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-      
-  {showCategories ? (
-    <section className="space-y-3">
-      <h2 className="text-sm font-semibold text-gray-500">Categories</h2>
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {categories.map(c => (
-          <li key={c.slug} className="rounded-xl border p-4 hover:bg-gray-50 dark:hover:bg-neutral-900">
-            <a href={`/c/${c.slug}`} className="flex items-center justify-between">
-              <span className="font-medium">{c.name}</span>
-              <span className="text-xs text-gray-500">{c.count}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      {/* NOTE: dark search bar removed */}
 
-      <h2 className="mt-6 text-sm font-semibold text-gray-500">All recipes</h2>
-      <ul className="grid gap-3">
-        {results.map((r:Recipe) => (
-          <li key={r.slug} className="rounded-xl border p-4 hover:bg-gray-50 dark:hover:bg-neutral-900">
-            <a href={`/recipes/${r.slug}`} className="block">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{r.title}</h3>
-                <span className="text-xs text-gray-500">{r.category}</span>
-              </div>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{r.description}</p>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
-) : (
-  <section className="space-y-3">
-    <h2 className="text-sm font-semibold text-gray-500">Search results</h2>
-    {results.length === 0 && <p className="text-sm text-gray-500">No matches.</p>}
-    <ul className="grid gap-3">
-      {results.map(r => (
-        <li key={r.slug} className="rounded-xl border p-4 hover:bg-gray-50 dark:hover:bg-neutral-900">
-          <a href={`/recipes/${r.slug}`} className="block">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{r.title}</h3>
-              <span className="text-xs text-gray-500">{r.category}</span>
-            </div>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{r.description}</p>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </section>
-)}
-</div>
-)
+      {showCategories ? (
+        <section className="space-y-3">
+          <h2 className="h-condensed text-xl mb-2">Categories</h2>
 
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {categories.map(({ name, slug, count }) => (
+              <Link
+                key={slug}
+                href={`/c/${slug}` as Route}
+                className="block rounded-lg border border-black/10 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="h-condensed text-xl text-[var(--brand-red-dark)]">{name}</div>
+                <div className="text-sm text-neutral-600">{count} recipes</div>
+              </Link>
+            ))}
+          </div>
+
+          <h2 className="mt-8 h-condensed text-xl">All recipes</h2>
+          <ul className="grid gap-3">
+            {results.map((r: Recipe) => (
+              <li key={r.slug} className="card p-4 hover:shadow-md transition-shadow">
+                <a href={`/recipes/${r.slug}`} className="block">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">{r.title}</h3>
+                    <span className="text-xs text-gray-500">{r.category}</span>
+                  </div>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{r.description}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-500">Search results</h2>
+          {results.length === 0 && <p className="text-sm text-gray-500">No matches.</p>}
+          <ul className="grid gap-3">
+            {results.map((r) => (
+              <li key={r.slug} className="card p-4 hover:shadow-md transition-shadow">
+                <a href={`/recipes/${r.slug}`} className="block">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">{r.title}</h3>
+                    <span className="text-xs text-gray-500">{r.category}</span>
+                  </div>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{r.description}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  )
 }

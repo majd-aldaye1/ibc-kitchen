@@ -12,3 +12,73 @@ body { @apply bg-white text-gray-900 dark:bg-neutral-950 dark:text-neutral-50; }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
+
+/* Fonts */
+@import "@fontsource-variable/oswald";
+@import "@fontsource/source-sans-3/400.css";
+@import "@fontsource/source-sans-3/600.css";
+
+/* Brand tokens that echo IBC style */
+:root {
+  --brand-red: #b90b0b;
+  --brand-red-dark:#8e0808;
+  --ink: #111111;
+  --paper:#f4f1ec;
+  --coal:#1b1b1b;
+}
+
+.body-paper {
+  background: var(--paper);
+  background-image:
+    radial-gradient(rbga(0, 0, 0, .03) 1px, transparent 1px),
+    radial-gradient(rbga(0, 0, 0, .02) 1px, transparent 1px);
+  background-position: 0 0, 8px 8px;
+  background-size: 16px 16px;
+}
+
+.h-condensed {
+  font-family: "Oswald Variable", system-ui, sans-serif;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+body {font-family: "Source Sans 3", system-ui, sans-serif; color:var(--ink);}
+
+:root{
+  --cream: #f6f1ee;                 /* page background */
+  --ink: #111;
+  --ink-muted: #6b7280;
+  --border: #e5e7eb;
+  --brand-red: #b11616;
+  --brand-red-dark:#8f0f0f;
+  --surface:#ffffff;                /* cards, inputs */
+  --surface-hover:#fff6f6;          /* gentle red tint on hover */
+}
+
+/* Page background */
+body { background: var(--cream); color: var(--ink); }
+
+/* Neutralize native dark form controls */
+input, select, textarea {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Reusable “form” and “card” styles (use with Tailwind) */
+@layer components{
+  .form {
+    @apply bg-white text-gray-900 border border-[var(--border)]
+           rounded-lg px-3 py-2 shadow-sm placeholder:text-neutral-500;
+  }
+  .form:focus { @apply outline-none ring-2 ring-[var(--brand-red)]/30 border-[var(--brand-red)]; }
+  .form:hover { background: var(--surface-hover); }
+
+  .card {
+    @apply bg-white border border-[var(--border)] rounded-xl;
+  }
+  .card:hover {
+    @apply shadow-md;
+    background: var(--surface-hover);
+  }
+}
+
