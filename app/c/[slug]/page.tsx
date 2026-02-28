@@ -2,12 +2,12 @@
 
 import Fuse from 'fuse.js'
 import { useMemo } from 'react'
-import recipes, { type Recipe } from '../data/recipes'
-import { catSlug } from '../lib/slug'
+import recipes, { type Recipe } from '../../../data/recipes'
+import { catSlug } from '../../../lib/slug'
 import Link from 'next/link'
 import type { Route } from 'next'
 import { useSearchParams } from 'next/navigation'
-import Hero from '../components/Hero'
+import Hero from '../../../components/Hero'
 
 export default function HomePage() {
   // Read q from URL so the header search controls results

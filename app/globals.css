@@ -70,7 +70,11 @@ input, select, textarea {
     @apply bg-white text-gray-900 border border-[var(--border)]
            rounded-lg px-3 py-2 shadow-sm placeholder:text-neutral-500;
   }
-  .form:focus { @apply outline-none ring-2 ring-[var(--brand-red)]/30 border-[var(--brand-red)]; }
+  .form:focus {
+  @apply outline-none;
+  border-color: var(--brand-red);
+  box-shadow: 0 0 0 3px rgba(177, 22, 22, 0.30); /* brand red with 30% opacity */
+}
   .form:hover { background: var(--surface-hover); }
 
   .card {
