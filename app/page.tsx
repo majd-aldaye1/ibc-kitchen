@@ -91,14 +91,14 @@ function HomeInner() {
 
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {categories.map(({ name, slug, count }) => (
-              <Link
+              <a
                 key={slug}
                 href={`/c/${slug}` as Route}
                 className="block rounded-lg border border-black/10 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="h-condensed text-xl text-[var(--brand-red-dark)]">{name}</div>
                 <div className="text-sm text-neutral-600">{count} recipes</div>
-              </Link>
+              </a>
             ))}
           </div>
 

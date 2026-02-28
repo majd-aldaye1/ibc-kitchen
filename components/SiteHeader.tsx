@@ -32,16 +32,6 @@ export default function SiteHeader() {
             <div className="h-condensed text-2xl text-white">IBC Kitchen</div>
           </Link>
 
-          {/* Nav (only Categories) */}
-          <nav className="hidden md:flex items-center">
-            <Link
-              href="/"
-              className="px-4 py-2 text-white/95 hover:text-white h-condensed tracking-wide"
-            >
-              Categories
-            </Link>
-          </nav>
-
           {/* Search */}
           <form onSubmit={submit} className="ml-auto flex w-full max-w-xl items-stretch gap-2">
             <input
